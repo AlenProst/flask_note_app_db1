@@ -1,0 +1,39 @@
+from flask import Flask, render_template, request, redirect
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+
+
+app = Flask(__name__)
+
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+
+db = SQLAlchemy(app)
+
+class Note(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    note_db = db.Column(db.String(200), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Note %r>' % self.id
+
+@app.route('/', methods=['POST', 'GET'])
+def index():
+    if request.method == 'POST':
+        note_back_end= request.form["the_note_entered_in_form"]
+        note_to_be_added_in_db = Note(note_db=note_back_end)
+
+        db.session.add(note_to_be_added_in_db)
+        db.session.commit()
+        return redirect('/')
+
+    else:
+        notes_saved = Note.query.order_by(Note.date_created).all()
+        return render_template("index.html", notes_saved = notes_saved)
+
+if __name__ == "__main__":
+    db.create_all()
+    app.run(debug=True)
