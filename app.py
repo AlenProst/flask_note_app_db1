@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -11,6 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 
 db = SQLAlchemy(app)
+
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,6 +34,29 @@ def index():
     else:
         notes_saved = Note.query.order_by(Note.date_created).all()
         return render_template("index.html", notes_saved = notes_saved)
+
+
+@app.route("/delete/<int:id>")
+def delete(id):
+    note_to_delete = Note.query.get(id)
+    db.session.delete(note_to_delete)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    note_to_update = Note.query.get_or_404(id)
+
+    if request.method=="POST":
+        note_to_update.note_db = request.form['content']    
+        db.session.commit()
+        return redirect('/')
+
+    else:
+        return render_template("update.html", note_to_update = note_to_update.id, note_to_update1 = note_to_update.note_db)
+
+       
+
 
 if __name__ == "__main__":
     db.create_all()

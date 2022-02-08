@@ -16,9 +16,9 @@
             <td>{{ notes.note_db }}</td>
             <td>{{ notes.date_created.date() }}</td>
             <td>
-                <a href="">Delete</a>
+                <a href="/delete/{{notes.id}}">Delete</a>
                 <br>
-                <a href="">Update</a>
+                <a href="/update/{{notes.id}}">Update</a>
             </td>
         </tr>
     {%  endfor %}
